@@ -4,6 +4,6 @@ function [W] = differentielle(D)
 n = length(D) + 1;
 h = 1/n;
 A = spmata(n-1);
-W=(h^2)*(A\D);
+W=(h^2).*(A\D);
 end
 

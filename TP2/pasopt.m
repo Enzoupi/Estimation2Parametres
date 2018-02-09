@@ -9,9 +9,9 @@ U = direct(F);
 global Uobs
 
 % 3) Calcul du pas optimal
-% Norme L2 : on ajoute h
-Norme_L2_W = h * sum(W.*W) ;
-rho = - h^2*sqrt(sum( (U-Uobs) .* W)) / Norme_L2_W;
+% Norme L2 : Il apparaît un h en haut et en bas, donc ils se simplifient
+Norme_L2_W = sum(W.*W) ;
+rho = - sum( (U-Uobs) .* W) / Norme_L2_W;
 
 %|----------------------------------------------------------------
 %| Vérifier que le produit scalaire dans L2 prend lui aussi un h (a priori

@@ -157,7 +157,7 @@ disp(['En exactement ' num2str(nit) ' itération(s)'])
 epsil = 1e-7;
 nitmax = 1000;
 findic = 2;
-x0 = [15 -15];
+x0 = [0 0];
 pas = 0.5;
 [resgopt,Jx,GJx,nit_gopt,nbeval] = GOPT(@J,@GJ,x0,epsil,nitmax,findic);
 [resgcst,~,~,nit_gcst]=GCST(@J,@GJ,x0,pas,epsil,nitmax,findic);

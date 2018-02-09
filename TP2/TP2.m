@@ -229,5 +229,55 @@ xlabel('x')
 ylabel('y')
 
 %% Exercice 4 : Calcul de la différentielle
-% Sur quel exemple peut-on valider ??
+% Sur quel exemple peut-on valider ? C'est le même probleme que le problème
+% direct de la première question. On peut faire le test avec la même
+% fonction.
+x = linspace(0,1,1e4);
+D = pi^2*sin(pi.*x)';
+solex = sin(pi.*x)';
+W = differentielle(D);
+figure
+hold on
+plot(x,solex)
+plot(x,W,'--')
+legend('solex','W')
+title('Solution exacte et approchée superposées')
+
+figure
+semilogy(x,abs(W-solex))
+title('log de l''erreur en fonction de la discrétisation en espace')
+xlabel('Discrétisation en espace')
+ylabel('log de l''erreur')
+
+%% Exercice 5 Question 2)
+disp('Exercice 5')
+nn=[100,250,500,750,1000,5000,10000];
+err=zeros(size(nn));
+for i=1:length(nn)
+    n=nn(i);
+    h = 1/n;
+    x=linspace(h,1-h,n-1);
+    solex = pi^2.*sin(pi.*x)';
+    Uobs = sin(pi.*x)';
+    F0=zeros(size(x))';
+    epsil=1e-7;
+    nitmax=100;
+    [F,JF,GJF,nit]=GOPT(@J,@GJ,F0,epsil,nitmax);
+    err(i) = max(abs(solex-F));
+end
+figure
+plot(x,F)
+
+%Calcul de la convergence
+coefs = polyfit(log10(nn),log10(err),1)
+
+figure
+loglog(nn,err,'-+')
+xlabel('Nombre de points de discrétisation de l''espace')
+ylabel('maximum de l''erreur')
+title(['Convergence de GOPT : ' num2str(-coefs(1))])
+
+%% Exercice 5 Question 3)
+
+
 
