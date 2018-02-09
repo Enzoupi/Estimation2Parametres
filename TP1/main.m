@@ -1,15 +1,11 @@
 clear variables
 close all
 %% Zone de commentaire
-% Programme principal pour le TP1 d'estimation de paramètres
+% Programme principal pour le TP1 d'estimation de paramètres. Il est
+% organisé en section qui répondent aux questions du TP dans l'ordre.
 
-% remarque : question 1 regarder aussi la convergence et non pas que le
-% nombre d'iterations
 
-%Remarque : fonction de Rosenvrock : le gradient à pas constant va
-%fonctionner pour des pas assez petits
-
-%% Cas test avec un vecteur 
+%% Cas test sur f(x) avec un vecteur 
 pas = 0.05;
 epsil = 0.01;
 nitmax = 1000;
@@ -35,7 +31,7 @@ for ndim = 1
     end
     plot(pas,nitconv)
 end
-title('Convergence en fonction du pas')
+title('Convergence de GCST en fonction du pas')
 xlabel('Taille du pas')
 ylabel('Nombre diterations avant convergence')
 legend('n=1')
@@ -43,11 +39,11 @@ hold off
 
 figure
 loglog(pas,abs(sol-res)/sol)
-title('Ecart relatif en fonction du pas')
+title('Ecart relatif de GCST en fonction du pas')
 xlabel('Taille du pas')
 ylabel('Ecart relatif')
 
-%% Cas Test avec Dai Yuan
+%% Cas Test sur f avec GCDYCST
 pas = 0.05;
 epsil = 1e-7;
 nitmax = 1000;
@@ -75,7 +71,7 @@ for ndim = 1:2
     err(ndim,i) = max(abs(solex-res)/solex);
     plot(pas,nitconv)
 end
-title('Convergence Pour GC de Dai Yuan')
+title('Convergence avec le GCDYCST sur f(x)')
 xlabel('Taille du pas')
 ylabel('Nombre diterations avant convergence')
 legend('n=1','n=2')
@@ -98,19 +94,19 @@ figure
 hold on
 plot(pas,nitgcdy)
 plot(pas,nitg)
-title('Comparaison des convergences pour deux versions de la descente du gradient')
+title('Comparaison des convergences pour deux versions de la descente du gradient sur g(x)')
 xlabel('Pas')
 ylabel('Nombre d iterations avant convergence')
-legend('Gradient conjugué (DY)','Gradient à pas constant')
+legend('GCDYCST','GCST')
 figure
 hold on
 plot(pas,errgcdy)
 plot(pas,errgcst)
 ylim([0 1e-7])
-title('Ecart relatif maximum')
+title('Ecart relatif maximum pour deux versions de la descente du gradient sur g(x)')
 xlabel('Pas')
 ylabel('Ecart relatif')
-legend('Gradient conjugué (DY)','Gradient à pas constant')
+legend('GCDYCST','GCST')
 
 %% Question 5
 findic = 3; % On choisit la fonction oscillante
@@ -128,7 +124,7 @@ figure
 hold on
 plot(x0,J(x0,findic))
 plot(x0,res)
-title('Minimum obtenu en fonction du point initial')
+title('Minimum obtenu pour s(x) en fonction du point initial')
 xlabel('x')
 ylabel('y')
 legend('Fonction oscillante','Minima obtenu')
@@ -144,7 +140,7 @@ disp('---------------------------------------------------------------')
 % comportement :
 epsil = 1e-7;
 nitmax = 1000;
-findic = 1;
+findic = 2;
 x0 = [5 3 64 15 -135];
 disp('Avec le Gradient à pas optimal')
 [x,Jx,GJx,nit,nbeval] = GOPT(@J,@GJ,x0,epsil,nitmax,findic);
@@ -160,7 +156,7 @@ disp(['En exactement ' num2str(nit) ' itération(s)'])
 %% Comparaison avec GCST pour n=2 et pas = 0.5
 epsil = 1e-7;
 nitmax = 1000;
-findic = 1;
+findic = 2;
 x0 = [15 -15];
 pas = 0.5;
 [resgopt,Jx,GJx,nit_gopt,nbeval] = GOPT(@J,@GJ,x0,epsil,nitmax,findic);
@@ -216,7 +212,6 @@ ylabel('log10 du nombre d itérations')
 legend('Gradient Conjugué DY Optimal','Gradient Optimal')
 
 
-
 figure
 hold on
 plot(log10(nn),log10(nbeval_gcdyopt))
@@ -235,7 +230,7 @@ x0 = [2.5 -2.5];
 
 
 [X,Y]=meshgrid(-3:0.05:3);
-Z=(X-1).^2+1/2.*(Y-2).^2
+Z=(X-1).^2+1/2.*(Y-2).^2;
 figure
 hold on
 plot3(resgopt(:,1),resgopt(:,2),(resgopt(:,1)-1).^2+1/2.*(resgopt(:,2)-2).^2,'-or')
@@ -251,7 +246,12 @@ func_f = @(x) J(x,1);
 func_g = @(x) J(x,2);
 func_s = @(x) J(x,3);
 func_rosen = @(x) J(x,4);
-options = optimset('TolX',1e-7,'Display','iter','MaxIter',50000,'MaxFunEvals',50000);
+
+% Choix de verbosité de l'affichage :
+%options = optimset('TolX',1e-7,'Display','iter','MaxIter',50000,'MaxFunEvals',50000);
+options = optimset('TolX',1e-7,'MaxIter',50000,'MaxFunEvals',50000);
+
+% Calcul des minimas
 [xg,~,~,output_g] = fminsearch(func_g,[15,-15],options)
 [xf,~,~,output_f] = fminsearch(func_f,[15,-15],options)
 [xs,~,~,output_s] = fminsearch(func_s,[15],options)
@@ -286,10 +286,12 @@ nitmax = 100000;
 findic = 4;
 pas = 1e-4;
 % calculs de minimisation
-%[resgopt,~,~,nit_gopt,nbeval]   =   GOPT(     @J,@GJ,x0,      epsil,nitmax,findic);
-%[resgcdyopt,~,~,nit,nbeval]     =   GCDYOPT(  @J,@GJ,x0,      epsil,nitmax,findic);
 [resgcst,~,~,nit_gcst]             =   GCST(          @J,@GJ,x0,pas,  epsil,nitmax,findic);
 [resgcdycst,~,~,nit_gcdycst]       =   GCDYCST(       @J,@GJ,x0,pas,  epsil,nitmax,findic);
+
+% Les pas optimaux ne sont pas encore implémentés
+%[resgopt,~,~,nit_gopt,nbeval]   =   GOPT(     @J,@GJ,x0,      epsil,nitmax,findic);
+%[resgcdyopt,~,~,nit,nbeval]     =   GCDYOPT(  @J,@GJ,x0,      epsil,nitmax,findic);
 
 findic = 4;
 x0 = [0.8 1.5];
@@ -309,15 +311,15 @@ figure
 hold on
 plot(log10(pas),log10(nitgcdy),'-+')
 plot(log10(pas),log10(nitg),'-+')
-title('Comparaison des convergences pour deux versions de la descente du gradient')
+title('Comparaison des convergences de GCDYCST et GCST sur h(x)')
 xlabel('log10 du pas')
 ylabel('log10 du nombre d iterations avant convergence')
-legend('Gradient conjugué (DY)','Gradient à pas constant')
+legend('GCDYCST','GCST')
 figure
 hold on
 plot(log10(pas),log10(errgcdy),'-+')
 plot(log10(pas),log10(errgcst),'-+')
-title('Ecart relatif maximum')
+title('Ecart relatif maximum  de GCDYCST et GCST sur h(x)')
 xlabel('log10 du pas')
 ylabel('log10 de l écart relatif')
-legend('Gradient conjugué (DY)','Gradient à pas constant')
+legend('GCDYCST','GCST')
