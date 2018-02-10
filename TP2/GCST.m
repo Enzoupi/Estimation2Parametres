@@ -1,12 +1,16 @@
-function [x,Jx,GJx,nit] = GCST(J,GJ,x0,pas,epsil,nitmax)
-error = 10000;
+function [F,JF,GJF,nit] = GCST(J,GJ,F0,pas,epsil,nitmax)
+%% Calcul de lerreur au point initial
 nit = 0;
+Grad = GJ(F0);
+error = norm(Grad);
+F = F0;
 while (error > epsil) && (nit < nitmax)
-   error = abs(norm(GJ(x0)));
-   x = x0 - pas .* GJ(x0);
-   nit = nit +1;
-   x0=x;
-   Jx = J(x);
-   GJx = GJ(x);
+    dk = -Grad;
+    F = F + pas .* dk;
+    Grad = GJ(F);
+    error = norm(Grad);
+    nit = nit +1;
 end
+JF = J(F);
+GJF = GJ(F);
 

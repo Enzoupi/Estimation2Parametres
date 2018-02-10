@@ -8,7 +8,7 @@ close all
 %Test dans un cas simple
 n = 150;
 h = 1/n;
-x=linspace(h,1-h,n-1);
+x=h:h:(1-h);
 F = pi^2*sin(pi.*x)';
 solex = sin(pi.*x)';
 U=direct(F);
@@ -19,6 +19,7 @@ plot(x,solex,'--')
 plot(x,F)
 plot(x,U,'+')
 legend('solution exacte','F','solution calculée')
+title('Résolution par la méthode des différences finies')
 
 nn=[10,20,30,40,50,100,250,500,1e3,1e4];
 h=zeros(size(n));
@@ -26,7 +27,7 @@ err=zeros(size(nn));
 for i=1:length(nn)
     n = nn(i); 
     h(i) = 1/n;
-    x=linspace(h(i),1-h(i),n-1);
+    x=h(i):h(i):(1-h(i));
     F = pi^2*sin(pi.*x)';
     solex = sin(pi.*x)';
     U=direct(F);
@@ -48,7 +49,7 @@ global Uobs
 for i=1:length(nn)
     n = nn(i); 
     h(i) = 1/n;
-    x=linspace(h(i),1-h(i),n-1);
+    x=h(i):h(i):(1-h(i));
     %---------------------------------------------------------------------
 %     % Test avec le U du sujet : Fonctionnel !
 %     U = (pi^2+1)*sin(pi.*x);
@@ -73,12 +74,12 @@ title(['Convergence du probleme adjoint : ' num2str(coeff(1))])
 % ==> Question 2) Faire des tests pour plusieurs valeurs du pas
 n = 150;
 h = 1/n;
-x=linspace(h,1-h,n-1);
+x=h:h:1-h;
 Uobs = sin(pi.*x)';
 F = zeros(length(x),1);
 solex = pi^2.*sin(pi.*x)';
 epsil = 1e-7;
-nitmax = 10000;
+nitmax = 5000;
 pas = [0.5 2 4 8 16 32 64 128 256 512];
 err = zeros(1,length(pas));
 niter = zeros(1,length(pas));
@@ -96,6 +97,7 @@ hold on
 plot(x,xmin_64,'-+')
 plot(x,solex)
 legend('Solution approchée','Solution exacte')
+title('Représentation de la solution de GCST et de la solution exacte pour pas = 64')
 
 figure
 subplot(2,1,1)
@@ -111,6 +113,8 @@ ylabel('log10 de l erreur')
 % dérivées en TD
 pas = 64;
 %pas = pi^2;
+% Convergence théorique obtenue en td : b^n
+b = 1- pas/pi^4; 
 nn = [1e2 1e3 1e4];
 epsil = 1e-7;
 nitmax = 10000;
@@ -119,7 +123,7 @@ err = zeros(length(nn),nitmax);
 for i=1:length(nn)
     n = nn(i);
     h = 1/n;
-    x=linspace(h,1-h,n-1);
+    x=h:h:1-h;;
     Uobs = sin(pi.*x)';
     F = zeros(length(x),1);
     solex = pi^2.*sin(pi.*x)';
@@ -137,7 +141,8 @@ figure
 hold on
 plot(0:nitmax_effect,log10(err),'-+')
 plot(0:nitmax_effect,coefs(1).*(0:nitmax_effect)+coefs(2),'--')
-legend('n=100','n=1000','n=10000',[num2str(coefs(1)) '* iter + ' num2str(coefs(2))])
+plot(0:nitmax_effect,log10(b).*(0:nitmax_effect)+coefs(2),'--')
+legend('n=100','n=1000','n=10000',[num2str(coefs(1)) '* iter + ' num2str(coefs(2))],'Convergence théorique')
 xlabel('Itération')
 ylabel('log10 de l''erreur')
 title('Erreur en fonction de l''itération')
@@ -149,17 +154,18 @@ plot(x,solex,'--k')
 legend('iteration 0','iteration 1','iteration 2','iteration 3','iteration 9',['iteration ' num2str(nit+1)],'solution exacte')
 xlabel('x')
 ylabel('y')
+title('Représentation de la solution en différentes itérations')
 
 %% Exercice 3 : Gradient conjugué à pas constant
 n = 100;
 h = 1/n;
-x=linspace(h,1-h,n-1);
+x=h:h:1-h;;
 Uobs = sin(pi.*x)';
 F = zeros(length(x),1);
 solex = pi^2.*sin(pi.*x)';
 epsil = 1e-7;
 nitmax = 10000;
-pas = [0.5 2 4 8 16 32 64 128 256 512];
+pas = [0.5 2 4 8 16 32 64 90 128 2*pi^4-2 256 512];
 err = zeros(1,length(pas));
 niter = zeros(1,length(pas));
 for i=1:length(pas)
@@ -180,9 +186,9 @@ title('GCDYCST')
 
 figure
 subplot(2,1,1)
-plot(log10(pas),log10(niter),'-+')
+plot(log10(pas),niter,'-+')
 xlabel('log10 du pas')
-ylabel('log10 du nombre d itérations')
+ylabel('nombre d itérations')
 subplot(2,1,2)
 plot(log10(pas),log10(err),'-+')
 xlabel('log10 du pas')
@@ -201,7 +207,7 @@ err = zeros(length(nn),nitmax);
 for i=1:length(nn)
     n = nn(i);
     h = 1/n;
-    x=linspace(h,1-h,n-1);
+    x=h:h:1-h;;
     Uobs = sin(pi.*x)';
     F = zeros(length(x),1);
     solex = pi^2.*sin(pi.*x)';
@@ -228,11 +234,42 @@ legend('Initialisation F(0)','iteration 1',['iteration ' num2str(nit)],'solution
 xlabel('x')
 ylabel('y')
 
+%% Exercice 3 : Test du pas optimal
+pas = pi^4;
+nn = [1e2 1e3 1e4 1e5];
+epsil = 1e-7;
+nitmax = 100;
+nitmax_effect = 0;
+err = zeros(length(nn),nitmax);
+for i=1:length(nn)
+    n = nn(i);
+    h = 1/n;
+    x=h:h:1-h;
+    Uobs = sin(pi.*x)';
+    F = zeros(length(x),1);
+    solex = pi^2.*sin(pi.*x)';
+    
+    [xmin,Jxmin,GJxmin,nit] = GCST_allx(@J,@GJ,F,pas,epsil,nitmax);
+    nitmax_effect = max(nitmax_effect,nit);
+    err(i,1:(nit+1))=max(abs(xmin-solex));
+end
+err=err(:,1:nitmax_effect+1);
+
+figure
+hold on
+plot(0:nitmax_effect,log10(err)','-+')
+legend('n=1e2','n=1e3','n=1e4','n=1e5')
+xlabel('Itération')
+ylabel('log10 de l''erreur')
+title('Erreur en fonction de l''itération pour le pas optimal avec GCST')
+
 %% Exercice 4 : Calcul de la différentielle
 % Sur quel exemple peut-on valider ? C'est le même probleme que le problème
 % direct de la première question. On peut faire le test avec la même
 % fonction.
-x = linspace(0,1,1e4);
+n=10000;
+h=1/n;
+x = h:h:1-h;
 D = pi^2*sin(pi.*x)';
 solex = sin(pi.*x)';
 W = differentielle(D);
@@ -255,19 +292,27 @@ epsil=1e-7;
 nitmax=1000;
 nn=[100,250,500,750,1000,5000,10000];
 err=zeros(size(nn));
+pas_opt=zeros(size(nn));
 for i=1:length(nn)
     n=nn(i);
     h = 1/n;
-    x=linspace(h,1-h,n-1);
+    x=h:h:1-h;
     solex = pi^2.*sin(pi.*x)';
     Uobs = sin(pi.*x)';
     F0=zeros(size(x))';
-
-    [F,JF,GJF,nit]=GOPT(@J,@GJ,F0,epsil,nitmax);
+    [F,JF,GJF,nit,pasopt]=GOPT(@J,@GJ,F0,epsil,nitmax);
     err(i) = max(abs(solex-F));
+    pas_opt(i) = pasopt;
 end
+
+% plot des pas optimaux
+coefs = polyfit(log10(nn),log10(abs(pas_opt-pi^4)),1);
 figure
-plot(x,F)
+plot(log10(nn),log10(abs(pas_opt-pi^4)),'-+')
+xlabel('log10 de nombre de points de discrétisation de l''espace')
+ylabel('log10(abs(pi^4-pas_optimal))')
+title(['Convergence du pas optimal vers pi^4 : ' num2str(-coefs(1))])
+
 
 %Calcul de la convergence
 coefs = polyfit(log10(nn),log10(err),1)
@@ -289,7 +334,7 @@ hold on
 for i=1:length(nn)
     n=nn(i);
     h = 1/n;
-    x=linspace(h,1-h,n-1);
+    x=h:h:1-h;
     solex = pi^2.*sin(pi.*x)';
     Uobs = sin(pi.*x)';
     F0=zeros(size(x))';

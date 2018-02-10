@@ -8,7 +8,7 @@ x = x0 + pas .* (-GJ(x0));
 xm1 = x0;
 dkm1 = -GJ(x0);
 nit = nit +1;
-error = abs(norm(GJ(x)));
+error = max(abs(GJ(x)));
 
 %Gradient conjugue de Dai Yuan
 while (error > epsil) && (nit < nitmax)
@@ -17,7 +17,7 @@ while (error > epsil) && (nit < nitmax)
    xm1 = x;
    x = x + pas .* dk;
    dkm1 = dk;
-   error = abs(norm(GJ(x)));
+   error = max(abs(GJ(x)));
    nit = nit +1;
 end
 Jx = J(x);
