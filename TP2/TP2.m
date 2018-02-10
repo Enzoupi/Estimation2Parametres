@@ -250,7 +250,9 @@ xlabel('Discrétisation en espace')
 ylabel('log de l''erreur')
 
 %% Exercice 5 Question 2)
-disp('Exercice 5')
+disp('Exercice 5 question 2')
+epsil=1e-7;
+nitmax=1000;
 nn=[100,250,500,750,1000,5000,10000];
 err=zeros(size(nn));
 for i=1:length(nn)
@@ -260,8 +262,7 @@ for i=1:length(nn)
     solex = pi^2.*sin(pi.*x)';
     Uobs = sin(pi.*x)';
     F0=zeros(size(x))';
-    epsil=1e-7;
-    nitmax=100;
+
     [F,JF,GJF,nit]=GOPT(@J,@GJ,F0,epsil,nitmax);
     err(i) = max(abs(solex-F));
 end
@@ -278,6 +279,36 @@ ylabel('maximum de l''erreur')
 title(['Convergence de GOPT : ' num2str(-coefs(1))])
 
 %% Exercice 5 Question 3)
+disp('Exercice 5 question 3')
+epsil=1e-7;
+nitmax=1000;
+nn=[5,10,20,50,75,100,250,500,750,1000,5000,10000];
+err=zeros(size(nn));
+figure
+hold on
+for i=1:length(nn)
+    n=nn(i);
+    h = 1/n;
+    x=linspace(h,1-h,n-1);
+    solex = pi^2.*sin(pi.*x)';
+    Uobs = sin(pi.*x)';
+    F0=zeros(size(x))';
+    epsil=1e-7;
+    nitmax=100;
+    [F,JF,GJF,nit]=GCDYOPT(@J,@GJ,F0,epsil,nitmax);
+    err(i) = max(abs(solex-F));
+    plot(x,F)
+end
+xlabel('abscisse')
+ylabel('ordonnées')
+title('Résultats obtenus pour différents n')
 
+%Calcul de la convergence
+coefs = polyfit(log10(nn),log10(err),1)
 
+figure
+loglog(nn,err,'-+')
+xlabel('Nombre de points de discrétisation de l''espace')
+ylabel('maximum de l''erreur')
+title(['Convergence de GCDYOPT : ' num2str(-coefs(1))])
 
